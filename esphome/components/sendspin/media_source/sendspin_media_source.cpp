@@ -45,6 +45,7 @@ bool SendspinMediaSource::can_handle(const std::string &uri) const { return uri.
 
 // THREAD CONTEXT: Main loop (media_source.h documents play_uri as main-loop only)
 bool SendspinMediaSource::play_uri(const std::string &uri) {
+  ESP_LOGE(TAG, "CUSTOM PLAY_URI FUNCTION EXECUTED");
   // The queued request has been delivered, whatever the outcome, so the next stream start may request again
   this->pending_start_ = false;
   ESP_LOGI(TAG,
