@@ -39,7 +39,12 @@ void SourceBinding::request_mute(bool is_muted) {
 
 // THREAD CONTEXT: Called from media source task thread; uses defer() to marshal to main loop
 void SourceBinding::request_play_uri(const std::string &uri) {
-  this->player->defer([this, uri]() { this->player->handle_play_uri_request_(this->pipeline, uri); });
+  ESP_LOGI(TAG, "DIAG: request_play_uri received: pipeline=%u, uri=%s",
+           this->pipeline, uri.c_str());
+
+  this->player->defer([this, uri]() {
+    this->player->handle_play_uri_request_(this->pipeline, uri);
+  });
 }
 
 // THREAD CONTEXT: Called during code generation setup (main loop)
@@ -320,7 +325,7 @@ media_source::MediaSource *SpeakerSourceMediaPlayer::find_source_for_uri_(const 
   media_source::MediaSource *first_match = nullptr;
   for (auto &binding : ps.sources) {
     if (binding->source->can_handle(uri)) {
-      // Prefer an idle source; otherwise remember the first match (will be stopped by try_execute_play_uri_)
+      // Prefer an idle source; otherwise remember the first match (will be stopped by _execute_play_uri_)
       if (binding->source->get_state() == media_source::MediaSourceState::IDLE) {
         return binding->source;
       }
@@ -332,7 +337,7 @@ media_source::MediaSource *SpeakerSourceMediaPlayer::find_source_for_uri_(const 
   return first_match;
 }
 
-bool SpeakerSourceMediaPlayer::try_execute_play_uri_(const std::string &uri, uint8_t pipeline) {
+bool SpeakerSourceMediaPlayer::_execute_play_uri_(const std::string &uri, uint8_t pipeline) {
   // Find target source
   media_source::MediaSource *target_source = this->find_source_for_uri_(uri, pipeline);
   if (target_source == nullptr) {
