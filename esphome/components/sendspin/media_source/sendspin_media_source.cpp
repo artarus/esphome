@@ -47,7 +47,15 @@ bool SendspinMediaSource::can_handle(const std::string &uri) const { return uri.
 bool SendspinMediaSource::play_uri(const std::string &uri) {
   // The queued request has been delivered, whatever the outcome, so the next stream start may request again
   this->pending_start_ = false;
+  ESP_LOGI(TAG,
+           "play_uri precheck: ready=%d failed=%d listener=%d state=%d",
+           this->is_ready(),
+           this->is_failed(),
+           this->has_listener(),
+           static_cast<int>(this->get_state()));
+
   if (!this->is_ready() || this->is_failed() || !this->has_listener()) {
+    ESP_LOGE(TAG, "play_uri rejected by precheck");
     return false;
   }
 
